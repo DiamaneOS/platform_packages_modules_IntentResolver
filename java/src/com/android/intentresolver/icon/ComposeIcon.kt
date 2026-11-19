@@ -37,7 +37,7 @@ fun Icon.toComposeIcon(pm: PackageManager, resolver: ContentResolver): ComposeIc
         Icon.TYPE_BITMAP -> BitmapIcon(bitmap)
         Icon.TYPE_RESOURCE -> pm.resourcesForPackage(resPackage)?.let { ResourceIcon(resId, it) }
         Icon.TYPE_DATA ->
-            BitmapIcon(BitmapFactory.decodeByteArray(dataBytes, dataOffset, dataLength))
+            BitmapFactory.decodeByteArray(dataBytes, dataOffset, dataLength)?.let { BitmapIcon(it) }
         Icon.TYPE_URI -> uriIcon(resolver)
         Icon.TYPE_ADAPTIVE_BITMAP -> AdaptiveIcon(BitmapIcon(bitmap))
         Icon.TYPE_URI_ADAPTIVE_BITMAP -> uriIcon(resolver)?.let { AdaptiveIcon(it) }
@@ -50,7 +50,7 @@ fun Icon.toComposeIcon(resources: Resources?, resolver: ContentResolver): Compos
         Icon.TYPE_BITMAP -> BitmapIcon(bitmap)
         Icon.TYPE_RESOURCE -> resources?.let { ResourceIcon(resId, resources) }
         Icon.TYPE_DATA ->
-            BitmapIcon(BitmapFactory.decodeByteArray(dataBytes, dataOffset, dataLength))
+            BitmapFactory.decodeByteArray(dataBytes, dataOffset, dataLength)?.let { BitmapIcon(it) }
         Icon.TYPE_URI -> uriIcon(resolver)
         Icon.TYPE_ADAPTIVE_BITMAP -> AdaptiveIcon(BitmapIcon(bitmap))
         Icon.TYPE_URI_ADAPTIVE_BITMAP -> uriIcon(resolver)?.let { AdaptiveIcon(it) }
@@ -84,5 +84,6 @@ private fun Icon.uriIcon(resolver: ContentResolver): BitmapIcon? {
             }
         }
         .getOrNull()
-        ?.let { inStream -> BitmapIcon(BitmapFactory.decodeStream(inStream)) }
+        ?.use { inStream -> BitmapFactory.decodeStream(inStream) }
+        ?.let { BitmapIcon(it) }
 }
